@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Migen Wallpaper Pro</title>
+    <style>
+        :root {
+            --accent-home: #00d2ff;
+            --accent-lock: #a855f7;
+            --accent-settings: #f1c40f;
+            --bg: #0f172a;
+            --card-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .app-container { width: 100%; max-width: 500px; padding: 20px; display: flex; flex-direction: column; }
+        .screen { display: none; flex-direction: column; gap: 20px; animation: fadeIn 0.3s ease; }
+        .screen.active { display: flex; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        h1 { text-align: center; font-size: 26px; margin-bottom: 20px; }
+
+        /* القائمة الرئيسية */
+        .menu-list { display: flex; flex-direction: column; gap: 15px; }
+        .menu-item {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 18px; font-weight: bold; transition: 0.3s;
+        }
+        .menu-item:hover { background: rgba(255,255,255,0.1); }
+
+        /* المعاينة */
+        .preview-box {
+            width: 140px; height: 240px; background: #1e293b; margin: 0 auto;
+            border: 5px solid #334155; border-radius: 20px; overflow: hidden;
+            display: flex; align-items: center; justify-content: center; position: relative;
+        }
+        .preview-box img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* الإعدادات */
+        .settings-group {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 15px;
+            display: flex; flex-direction: column; gap: 15px;
+        }
+        .setting-item { display: flex; justify-content: space-between; align-items: center; }
+        select, input[type="number"] {
+            background: #1e293b; color: white; border: 1px solid var(--accent-settings);
+            padding: 5px; border-radius: 5px; outline: none;
+        }
+
+        .btn { padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-back { background: transparent; color: #94a3b8; border: 1px solid #334155; margin-top: 10px; }
+        .btn-add-home { background: var(--accent-home); color: #000; }
+        .btn-add-lock { background: var(--accent-lock); color: #fff; }
+
+        .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .gallery-item { aspect-ratio: 9/16; background: #1e293b; border-radius: 8px; overflow: hidden; position: relative; }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
+        .remove-btn { position: absolute; top: 2px; right: 2px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <div id="mainMenu" class="screen active">
+            <h1 style="color: var(--accent-home);">خلفيات مِيجن</h1>
+            <div class="menu-list">
+                <div class="menu-item" onclick="showScreen('homeScreen')">
+                    <span>🏠 الشاشة الرئيسية</span>
+                    <span style="color: var(--accent-home)">➜</span>
+                </div>
+                <div class="menu-item" onclick="showScreen('lockScreen')">
+                    <span>🔒 شاشة القفل</span>
+                    <span style="color: var(--accent-lock)">➜</span>
+                </div>
+                <div class="menu-item" onclick="showScreen('settingsScreen')">
+                    <span>⚙️ الإعدادات</span>
+                    <span style="color: var(--accent-settings)">➜</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="homeScreen" class="screen">
+            <h1>إعدادات الرئيسية</h1>
+            <div class="preview-box">
+                <img id="previewHome" src="" style="display:none">
+                <span id="labelHome">فارغ</span>
+            </div>
+            <button class="btn btn-add-home" onclick="triggerInput('home')">+ إضافة صور</button>
+            <div id="galleryHome" class="gallery"></div>
+            <button class="btn btn-back" onclick="showScreen('mainMenu')">رجوع</button>
+        </div>
+
+        <div id="lockScreen" class="screen">
+            <h1>إعدادات القفل</h1>
+            <div class="preview-box">
+                <img id="previewLock" src="" style="display:none">
+                <span id="labelLock">فارغ</span>
+            </div>
+            <button class="btn btn-add-lock" onclick="triggerInput('lock')">+ إضافة صور</button>
+            <div id="galleryLock" class="gallery"></div>
+            <button class="btn btn-back" onclick="showScreen('mainMenu')">رجوع</button>
+        </div>
+
+        <div id="settingsScreen" class="screen">
+            <h1 style="color: var(--accent-settings)">إعدادات التبديل</h1>
+            <div class="settings-group">
+                <div class="setting-item">
+                    <span>وقت التبديل تلقائياً:</span>
+                    <select id="timerInterval">
+                        <option value="5">كل 5 دقائق</option>
+                        <option value="30">كل 30 دقيقة</option>
+                        <option value="60">كل ساعة</option>
+                        <option value="1440">كل يوم</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <span>نظام الاختيار:</span>
+                    <select id="switchMode">
+                        <option value="sequence">بالترتيب</option>
+                        <option value="random">عشوائي</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <span>تغيير عند فتح القفل:</span>
+                    <input type="checkbox" id="unlockSwitch" checked>
+                </div>
+            </div>
+            <button class="btn btn-back" style="border-color: var(--accent-settings); color: var(--accent-settings)" onclick="saveSettings()">حفظ الإعدادات</button>
+            <button class="btn btn-back" onclick="showScreen('mainMenu')">رجوع</button>
+        </div>
+
+        <input type="file" id="globalFileInput" hidden multiple accept="image/*">
+    </div>
+
+    <script>
+        let homeImages = [];
+        let lockImages = [];
+        let currentTarget = 'home';
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function triggerInput(target) {
+            currentTarget = target;
+            document.getElementById('globalFileInput').click();
+        }
+
+        document.getElementById('globalFileInput').addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const list = (currentTarget === 'home') ? homeImages : lockImages;
+                    list.push(ev.target.result);
+                    renderGallery(currentTarget);
+                    updatePreview(currentTarget, ev.target.result);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+
+        function renderGallery(type) {
+            const gallery = document.getElementById(type === 'home' ? 'galleryHome' : 'galleryLock');
+            const list = type === 'home' ? homeImages : lockImages;
+            gallery.innerHTML = '';
+            list.forEach((src, index) => {
+                const div = document.createElement('div');
+                div.className = 'gallery-item';
+                div.innerHTML = `<img src="${src}" onclick="updatePreview('${type}', '${src}')">
+                                 <button class="remove-btn" onclick="removeImg('${type}', ${index})">×</button>`;
+                gallery.appendChild(div);
+            });
+        }
+
+        function updatePreview(type, src) {
+            const img = document.getElementById(type === 'home' ? 'previewHome' : 'previewLock');
+            const label = document.getElementById(type === 'home' ? 'labelHome' : 'labelLock');
+            img.src = src; img.style.display = 'block'; label.style.display = 'none';
+        }
+
+        function removeImg(type, index) {
+            const list = (type === 'home') ? homeImages : lockImages;
+            list.splice(index, 1);
+            renderGallery(type);
+        }
+
+        function saveSettings() {
+            alert("تم حفظ إعدادات التبديل بنجاح يا مِيجن!");
+            showScreen('mainMenu');
+        }
+    </script>
+</body>
+</html>
